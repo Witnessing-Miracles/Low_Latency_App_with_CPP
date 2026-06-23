@@ -27,7 +27,7 @@ namespace Common {
     int port_ = -1;
     bool is_udp_ = false;
     bool is_listening_ = false;
-    bool needs_so_timestamp_ =  false;
+    bool needs_so_timestamp_ = false;
 
     auto toString() const {
       std::stringstream ss;
