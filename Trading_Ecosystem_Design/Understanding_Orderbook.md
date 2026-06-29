@@ -18,7 +18,7 @@ The electronic trading ecosystem consists of two sides:
 - Order Gateway Codec Client
 - Trading Engine
 
-![Trading Ecosystem](img/trading_ecosystem.png)
+![Trading Ecosystem](img/orderbook/trading_ecosystem.png)
 
 ---
 
@@ -118,7 +118,7 @@ The "brain" of the market participant system. It:
 
 ### Structure
 
-![Initial Order Book](img/orderbook_table1.png)
+![Initial Order Book](img/orderbook/orderbook_table1.png)
 
 Orders are sorted:
 - **Bids**: highest price first (most aggressive buyer at the top)
@@ -146,7 +146,7 @@ Three participants: Client A, Client B, Client C.
 Client A adds: BUY 10 @ 10.90 (OrderId 8)
 Client B adds: SELL 10 @ 11.20 (OrderId 9)
 
-![After Adding Orders](img/orderbook_table2.png)
+![After Adding Orders](img/orderbook/orderbook_table2.png)
 
 FIFO at 10.90 BID: OrderId 1 (arrived first) → OrderId 8 (arrived second).
 11.20 ASK is the worst ask price, goes to the bottom of the ask side.
@@ -161,7 +161,7 @@ Example:
 - Client A increases OrderId 2 (BUY @ 10.80) from qty 10 → 20: **moves to back of 10.80 queue**
 - Client B decreases OrderId 5 (SELL @ 11.00) from qty 10 → 1: **stays at front**
 
-![After Modification](img/orderbook_table3.png)
+![After Modification](img/orderbook/orderbook_table3.png)
 
 Correct state at 10.80 BID after modification:
 
@@ -177,7 +177,7 @@ Correct state at 10.80 BID after modification:
 - Client C changes OrderId 4 price from 10.70 → 10.90: **moves to back of 10.90 BID queue**
 - Client B cancels OrderId 9 (SELL @ 11.20): **OrderId 9 is permanently gone, never reused**
 
-![After Price Change and Cancel](img/orderbook_table4.png)
+![After Price Change and Cancel](img/orderbook/orderbook_table4.png)
 
 ---
 
@@ -196,14 +196,14 @@ Matching rules:
 Matches against OrderId 1 (20 qty, full fill) and OrderId 8 (10 qty, full fill).
 OrderId 4 partially filled: 20 of 80 remaining sold → 60 qty left.
 
-![After Match Example 1](img/orderbook_table5.png)
+![After Match Example 1](img/orderbook/orderbook_table5.png)
 
 ### Example 2 – Client A buys 10 @ 11.00
 
 Matches OrderId 5 (1 qty, full fill) and OrderId 6 (5 qty, full fill).
 Remaining 4 qty unmatched → becomes passive BUY order resting in the book.
 
-![After Match Example 2](img/orderbook_table6.png)
+![After Match Example 2](img/orderbook/orderbook_table6.png)
 
 ---
 
