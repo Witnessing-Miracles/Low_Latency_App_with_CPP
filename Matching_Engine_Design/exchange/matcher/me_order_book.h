@@ -83,7 +83,56 @@ namespace Exchange {
                     if (add_after)
                         target = target->next_entry_;
                 }
+
+                if (add_after) { // add new_orders_at_price after target.
+                    if (target == best_orders_by_price) {
+                        target = best_orders_by_price->prev_entry_;
+                    }
+                    new_orders_at_price->prev_entry_ = target;
+                    target->next_entry_->prev_entry_ = new_orders_at_price;
+                    new_orders_at_price->next_entry_ = target->next_entry_;
+                    target->next_entry_ = new_orders_at_price;
+                } else { // add new_orders_at_price before target.
+                    new_orders_at_price->prev_entry_ = target->prev_entry_;
+                    new_orders_at_price->next_entry_ = target;
+                    target->prev_entry_->next_entry_ = new_orders_at_price;
+                    target->prev_entry_ = new_orders_at_price;
+
+                if ((new_orders_at_price->side_ == Side::BUY && new_orders_at_price->price_ > best_orders_by_price->price_) ||
+                    (new_orders_at_price->side_ == Side::SELL && new_orders_at_price->price_ < best_orders_by_price->price_)) {
+                        target->next_entry_ = (target->next_entry_ == best_orders_by_price ? new_orders_at_price : target->next_entry_);
+                        (new_orders_at_price->side_ == Side::BUY ? bids_by_price_ : asks_by_price_) = new_orders_at_price;
+                    }
+                }
             }
+        }
+
+        auto getNextPriority(Price price) noexcept {
+            const auto orders_at_price = getOrdersAtPrice(price);
+            if (!orders_at_price)
+                return 1lu;
+
+            return orders_at_price->first_me_order_->prev_order_->priority_ + 1;
+        }
+
+        auto addOrder(MEOrder *order) noexcept {
+            const auto orders_at_price = getOrdersAtPrice(order->price_);
+
+            if (!orders_at_price) {
+                order->next_order_ = order->prev_order_ = order;
+
+                auto new_orders_at_price = orders_at_price_pool_.allocate(order->side_, order->price_, order, nullptr, nullptr);
+                addOrdersAtPrice(new_orders_at_price);
+            } else {
+                auto first_order = (orders_at_price ? orders_at_price->first_me_order_ : nullptr);
+
+                first_order->prev_order_->next_order_ = order;
+                order->prev_order_ = first_order->prev_order_;
+                order->next_order_ = first_order;
+                first_order->prev_order_ = order;
+            }
+
+            cid_oid_to_order_.at(order->client_id_).at(order->client_order_id_) = order;
         }
     };
 
