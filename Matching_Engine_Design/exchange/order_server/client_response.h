@@ -8,7 +8,6 @@
 using namespace Common;
 
 namespace Exchange {
-#pragma pack(push, 1)
   enum class ClientResponseType : uint8_t {
     INVALID = 0,
     ACCEPTED = 1,
@@ -32,6 +31,8 @@ namespace Exchange {
     }
     return "UNKNOWN";
   }
+
+#pragma pack(push, 1)
 
   struct MEClientResponse {
     ClientResponseType type_ = ClientResponseType::INVALID;
@@ -57,6 +58,21 @@ namespace Exchange {
          << " exec_qty:" << qtyToString(exec_qty_)
          << " leaves_qty:" << qtyToString(leaves_qty_)
          << " price:" << priceToString(price_)
+         << "]";
+      return ss.str();
+    }
+  };
+
+  struct OMClientResponse {
+    size_t seq_num_ = 0;
+    MEClientResponse me_client_response_;
+
+    auto toString() const {
+      std::stringstream ss;
+      ss << "OMClientResponse"
+         << " ["
+         << "seq:" << seq_num_
+         << " " << me_client_response_.toString()
          << "]";
       return ss.str();
     }
