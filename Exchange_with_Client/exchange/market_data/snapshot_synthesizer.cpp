@@ -13,8 +13,7 @@ namespace Exchange {
             orders.fill(nullptr);
     }
 
-    SnapshotSynthesizer::~SnapshotSynthesizer()
-    {
+    SnapshotSynthesizer::~SnapshotSynthesizer() {
         stop();
     }
 
@@ -53,7 +52,7 @@ namespace Exchange {
 
             case MarketUpdateType::CANCEL: {
                 auto order = orders->at(me_market_update.order_id_);
-                ASSERT(order != nullptr, "Received:" + me_market_update.toString() + "but order does not exist.");
+                ASSERT(order != nullptr, "Received:" + me_market_update.toString() + " but order does not exist.");
                 ASSERT(order->order_id_ == me_market_update.order_id_, "Expecting existing order to match new one.");
                 ASSERT(order->side_ == me_market_update.side_, "Expecting existing order to match new one.");
 
@@ -98,8 +97,7 @@ namespace Exchange {
             for (const auto order: orders) {
                 if (order) {
                     const MDPMarketUpdate market_update{snapshot_size++, *order};
-                    logger_.log("%:% %() % %\n", __FILE__, __LINE__, __FUNCTION__, getCurrentTimeStr(&time_str_),
-                            clear_market_update.toString());
+                    logger_.log("%:% %() % %\n", __FILE__, __LINE__, __FUNCTION__, getCurrentTimeStr(&time_str_), market_update.toString());
                     snapshot_socket_.send(&market_update, sizeof(MDPMarketUpdate));
                     snapshot_socket_.sendAndRecv();
                 }
@@ -120,7 +118,7 @@ namespace Exchange {
             for (auto market_update = snapshot_md_updates_->getNextToRead(); snapshot_md_updates_->size() && market_update;
                 market_update = snapshot_md_updates_->getNextToRead()) {
                 logger_.log("%:% %() % Processing %\n", __FILE__, __LINE__, __FUNCTION__, getCurrentTimeStr(&time_str_),
-                market_update->toString().c_str());
+                            market_update->toString().c_str());
 
                 addToSnapshot(market_update);
                 snapshot_md_updates_->updateReadIndex();
