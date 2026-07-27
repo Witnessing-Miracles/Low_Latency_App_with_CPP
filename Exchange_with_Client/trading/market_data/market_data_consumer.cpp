@@ -140,7 +140,7 @@ namespace Trading {
     incremental_queued_msgs_.clear();
     in_recovery_ = false;
 
-    snapshot_mcast_socket_.leave(snapshot_ip_, snapshot_port_);
+    snapshot_mcast_socket_.leave(snapshot_ip_, snapshot_port_);;
   }
 
   /// Queue up a message in the *_queued_msgs_ containers, first parameter specifies if this update came from the snapshot or the incremental streams.

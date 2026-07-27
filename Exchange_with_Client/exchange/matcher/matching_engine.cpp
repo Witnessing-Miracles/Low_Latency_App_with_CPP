@@ -11,7 +11,7 @@ namespace Exchange {
   }
 
   MatchingEngine::~MatchingEngine() {
-    run_ = false;
+    stop();
 
     using namespace std::literals::chrono_literals;
     std::this_thread::sleep_for(1s);
@@ -26,6 +26,7 @@ namespace Exchange {
     }
   }
 
+  /// Start and stop the matching engine main thread.
   auto MatchingEngine::start() -> void {
     run_ = true;
     ASSERT(Common::createAndStartThread(-1, "Exchange/MatchingEngine", [this]() { run(); }) != nullptr, "Failed to start MatchingEngine thread.");

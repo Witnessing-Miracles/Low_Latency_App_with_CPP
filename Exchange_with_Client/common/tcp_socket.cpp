@@ -34,7 +34,7 @@ namespace Common {
           cmsg->cmsg_type == SCM_TIMESTAMP &&
           cmsg->cmsg_len == CMSG_LEN(sizeof(time_kernel))) {
         memcpy(&time_kernel, CMSG_DATA(cmsg), sizeof(time_kernel));
-        kernel_time = time_kernel.tv_sec * NANOS_TO_SECS + time_kernel.tv_usec * NANO_TO_MICROS; // convert timestamp to nanoseconds.
+        kernel_time = time_kernel.tv_sec * NANOS_TO_SECS + time_kernel.tv_usec * NANOS_TO_MICROS; // convert timestamp to nanoseconds.
       }
 
       const auto user_time = getCurrentNanos();
