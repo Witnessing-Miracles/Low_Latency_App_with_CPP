@@ -1,6 +1,6 @@
 # Low_Latency_App_with_CPP
 
-A modern C++ implementation of a full-pipeline, low-latency electronic trading ecosystem, following the architecture and design principles from Sourav Ghosh's *Building Low Latency Applications with C++* (Packt). The system is split into an **exchange side** (matching engine, order gateway, market data publisher) and a mirrored **client side** (order gateway client, market data consumer, trading strategy framework), communicating over TCP and UDP multicast.
+A modern C++ implementation of a full-pipeline, low-latency electronic trading ecosystem. The system is split into an **exchange side** (matching engine, order gateway, market data publisher) and a mirrored **client side** (order gateway client, market data consumer, trading strategy framework), communicating over TCP and UDP multicast.
 
 ## Architecture Overview
 
@@ -44,7 +44,3 @@ Mirroring the exchange side, the client stack includes:
 | `Exchange_with_Client` | Combined exchange-side and client-side source implementation |
 | `Trading_Ecosystem_Design_Overview` | Architecture diagrams and design notes for the full trading ecosystem |
 | `components_part1` | Early foundational components (data types, IPC, logging/time utilities) |
-
-## Reference
-
-Design and terminology follow Sourav Ghosh, *Building Low Latency Applications with C++* (Packt Publishing).
