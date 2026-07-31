@@ -67,6 +67,7 @@ namespace Trading {
     auto next_write = outgoing_ogw_requests_->getNextToWriteTo();
     *next_write = std::move(*client_request);
     outgoing_ogw_requests_->updateWriteIndex();
+    TTT_MEASURE(T10_TradeEngine_LFQueue_write, logger_);
   }
 
   /// Main loop for this thread - processes incoming client responses and market data updates which in turn may generate client requests.
@@ -74,6 +75,8 @@ namespace Trading {
     logger_.log("%:% %() %\n", __FILE__, __LINE__, __FUNCTION__, Common::getCurrentTimeStr(&time_str_));
     while (run_) {
       for (auto client_response = incoming_ogw_responses_->getNextToRead(); client_response; client_response = incoming_ogw_responses_->getNextToRead()) {
+        TTT_MEASURE(T9t_TradeEngine_LFQueue_read, logger_);
+
         logger_.log("%:% %() % Processing %\n", __FILE__, __LINE__, __FUNCTION__, Common::getCurrentTimeStr(&time_str_),
                     client_response->toString().c_str());
         onOrderUpdate(client_response);
@@ -82,6 +85,8 @@ namespace Trading {
       }
 
       for (auto market_update = incoming_md_updates_->getNextToRead(); market_update; market_update = incoming_md_updates_->getNextToRead()) {
+        TTT_MEASURE(T9_TradeEngine_LFQueue_read, logger_);
+
         logger_.log("%:% %() % Processing %\n", __FILE__, __LINE__, __FUNCTION__, Common::getCurrentTimeStr(&time_str_),
                     market_update->toString().c_str());
         ASSERT(market_update->ticker_id_ < ticker_order_book_.size(),
@@ -101,11 +106,17 @@ namespace Trading {
 
     auto bbo = book->getBBO();
 
+    START_MEASURE(Trading_PositionKeeper_updateBBO);
     position_keeper_.updateBBO(ticker_id, bbo);
+    END_MEASURE(Trading_PositionKeeper_updateBBO, logger_);
 
+    START_MEASURE(Trading_FeatureEngine_onOrderBookUpdate);
     feature_engine_.onOrderBookUpdate(ticker_id, price, side, book);
+    END_MEASURE(Trading_FeatureEngine_onOrderBookUpdate, logger_);
 
+    START_MEASURE(Trading_TradeEngine_algoOnOrderBookUpdate_);
     algoOnOrderBookUpdate_(ticker_id, price, side, book);
+    END_MEASURE(Trading_TradeEngine_algoOnOrderBookUpdate_, logger_);
   }
 
   /// Process trade events - updates the  feature engine and informs the trading algorithm about the trade event.
@@ -113,9 +124,13 @@ namespace Trading {
     logger_.log("%:% %() % %\n", __FILE__, __LINE__, __FUNCTION__, Common::getCurrentTimeStr(&time_str_),
                 market_update->toString().c_str());
 
+    START_MEASURE(Trading_FeatureEngine_onTradeUpdate);
     feature_engine_.onTradeUpdate(market_update, book);
+    END_MEASURE(Trading_FeatureEngine_onTradeUpdate, logger_);
 
+    START_MEASURE(Trading_TradeEngine_algoOnTradeUpdate_);
     algoOnTradeUpdate_(market_update, book);
+    END_MEASURE(Trading_TradeEngine_algoOnTradeUpdate_, logger_);
   }
 
   /// Process client responses - updates the position keeper and informs the trading algorithm about the response.
@@ -124,9 +139,13 @@ namespace Trading {
                 client_response->toString().c_str());
 
     if (UNLIKELY(client_response->type_ == Exchange::ClientResponseType::FILLED)) {
+      START_MEASURE(Trading_PositionKeeper_addFill);
       position_keeper_.addFill(client_response);
+      END_MEASURE(Trading_PositionKeeper_addFill, logger_);
     }
 
+    START_MEASURE(Trading_TradeEngine_algoOnOrderUpdate_);
     algoOnOrderUpdate_(client_response);
+    END_MEASURE(Trading_TradeEngine_algoOnOrderUpdate_, logger_);
   }
 }

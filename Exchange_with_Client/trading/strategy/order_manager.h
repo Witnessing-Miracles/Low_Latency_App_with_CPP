@@ -62,16 +62,22 @@ namespace Trading {
       switch (order->order_state_) {
         case OMOrderState::LIVE: {
           if(order->price_ != price) {
+            START_MEASURE(Trading_OrderManager_cancelOrder);
             cancelOrder(order);
+            END_MEASURE(Trading_OrderManager_cancelOrder, (*logger_));
           }
         }
           break;
         case OMOrderState::INVALID:
         case OMOrderState::DEAD: {
           if(LIKELY(price != Price_INVALID)) {
+            START_MEASURE(Trading_RiskManager_checkPreTradeRisk);
             const auto risk_result = risk_manager_.checkPreTradeRisk(ticker_id, side, qty);
+            END_MEASURE(Trading_RiskManager_checkPreTradeRisk, (*logger_));
             if(LIKELY(risk_result == RiskCheckResult::ALLOWED)) {
+              START_MEASURE(Trading_OrderManager_newOrder);
               newOrder(order, ticker_id, price, side, qty);
+              END_MEASURE(Trading_OrderManager_newOrder, (*logger_));
             } else
               logger_->log("%:% %() % Ticker:% Side:% Qty:% RiskCheckResult:%\n", __FILE__, __LINE__, __FUNCTION__,
                            Common::getCurrentTimeStr(&time_str_),
@@ -93,12 +99,16 @@ namespace Trading {
     auto moveOrders(TickerId ticker_id, Price bid_price, Price ask_price, Qty clip) noexcept {
       {
         auto bid_order = &(ticker_side_order_.at(ticker_id).at(sideToIndex(Side::BUY)));
+        START_MEASURE(Trading_OrderManager_moveOrder);
         moveOrder(bid_order, ticker_id, bid_price, Side::BUY, clip);
+        END_MEASURE(Trading_OrderManager_moveOrder, (*logger_));
       }
 
       {
         auto ask_order = &(ticker_side_order_.at(ticker_id).at(sideToIndex(Side::SELL)));
+        START_MEASURE(Trading_OrderManager_moveOrder);
         moveOrder(ask_order, ticker_id, ask_price, Side::SELL, clip);
+        END_MEASURE(Trading_OrderManager_moveOrder, (*logger_));
       }
     }
 

@@ -39,10 +39,12 @@ namespace Trading {
         const auto threshold = ticker_cfg_.at(market_update->ticker_id_).threshold_;
 
         if (agg_qty_ratio >= threshold) {
+          START_MEASURE(Trading_OrderManager_moveOrders);
           if (market_update->side_ == Side::BUY)
             order_manager_->moveOrders(market_update->ticker_id_, bbo->ask_price_, Price_INVALID, clip);
           else
             order_manager_->moveOrders(market_update->ticker_id_, Price_INVALID, bbo->bid_price_, clip);
+          END_MEASURE(Trading_OrderManager_moveOrders, (*logger_));
         }
       }
     }
@@ -51,7 +53,9 @@ namespace Trading {
     auto onOrderUpdate(const Exchange::MEClientResponse *client_response) noexcept -> void {
       logger_->log("%:% %() % %\n", __FILE__, __LINE__, __FUNCTION__, Common::getCurrentTimeStr(&time_str_),
                    client_response->toString().c_str());
+      START_MEASURE(Trading_OrderManager_onOrderUpdate);
       order_manager_->onOrderUpdate(client_response);
+      END_MEASURE(Trading_OrderManager_onOrderUpdate, (*logger_));
     }
 
     /// Deleted default, copy & move constructors and assignment-operators.
