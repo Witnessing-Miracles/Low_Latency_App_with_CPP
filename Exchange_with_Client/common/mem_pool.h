@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <memory>
 
 #include "macros.h"
 
@@ -36,6 +37,7 @@ namespace Common {
       ASSERT(elem_index >= 0 && static_cast<size_t>(elem_index) < store_.size(), "Element being deallocated does not belong to this Memory pool.");
       ASSERT(!store_[elem_index].is_free_, "Expected in-use ObjectBlock at index:" + std::to_string(elem_index));
       store_[elem_index].is_free_ = true;
+      std::destroy_at(const_cast<T *>(elem));
     }
 
     // Deleted default, copy & move constructors and assignment-operators.
